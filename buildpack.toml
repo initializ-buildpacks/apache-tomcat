@@ -16,16 +16,16 @@ api = "0.7"
 
 [buildpack]
   description = "A Cloud Native Buildpack that contributes Apache Tomcat and Process Types for WARs"
-  homepage = "https://github.com/paketo-buildpacks/apache-tomcat"
-  id = "paketo-buildpacks/apache-tomcat"
+  homepage = "https://github.com/initializ-buildpacks/apache-tomcat"
+  id = "initializ-buildpacks/apache-tomcat"
   keywords = ["java", "tomcat", "war"]
-  name = "Paketo Buildpack for Apache Tomcat"
+  name = "Initializ Buildpack for Apache Tomcat"
   sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
   version = "{{.version}}"
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
-    uri = "https://github.com/paketo-buildpacks/apache-tomcat/blob/main/LICENSE"
+    uri = "https://github.com/initializ-buildpacks/apache-tomcat/blob/main/LICENSE"
 
 [metadata]
   include-files = ["LICENSE", "NOTICE", "README.md", "linux/amd64/bin/build", "linux/amd64/bin/detect", "linux/amd64/bin/main", "linux/amd64/bin/helper", "linux/arm64/bin/build", "linux/arm64/bin/detect", "linux/arm64/bin/main", "linux/arm64/bin/helper", "buildpack.toml", "resources/context.xml", "resources/logging.properties", "resources/server.xml", "resources/web.xml"]

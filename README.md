@@ -1,73 +1,80 @@
-docker.io/initializ-buildpacks/apache-tomcat
+# `docker.io/initializ-buildpacks/apache-tomcat`
 
-The Initializ Buildpack for Apache Tomcat is a Cloud Native Buildpack designed to seamlessly integrate Apache Tomcat and Process Types for WARs into your deployment pipeline.
+The Initializ Buildpack for Apache Tomcat is a Cloud Native Buildpack that contributes Apache Tomcat and Process Types for WARs.
 
-Overview
-This buildpack automatically detects and configures Apache Tomcat for your Java applications. It ensures that your WAR files are efficiently deployed and managed within a Tomcat environment.
+## Behavior
 
-How it Works
-Conditions for Participation
-For this buildpack to take effect, the following conditions must be met:
+This buildpack will participate if all of the following conditions are met
 
-$BP_JAVA_APP_SERVER is set to tomcat, or it's unset/empty, and this buildpack is the first to provide a Java application server.
-The <APPLICATION_ROOT>/WEB-INF directory exists.
-The manifest file does not define Main-Class.
-Behavior
-Once activated, the buildpack performs the following tasks:
+* `$BP_JAVA_APP_SERVER` is `tomcat` or if `$BP_JAVA_APP_SERVER` is unset or empty and this is the first buildpack to provide a Java application server.
+* `<APPLICATION_ROOT>/WEB-INF` exists
+* `Main-Class` is NOT defined in the manifest
 
-Requests installation of a JRE.
-Adds Apache Tomcat to both $CATALINA_HOME and $CATALINA_BASE.
-Includes essential configuration files like context.xml, logging.properties, server.xml, and web.xml under conf/.
-Integrates [Access Logging Support][als], [Lifecycle Support][lcs], and [Logging Support][lgs].
-Optionally incorporates external configurations if provided.
-Defines process types such as tomcat, task, and web.
-Tiny Stack Considerations
-When operating within the Tiny stack, certain limitations and adjustments apply:
+The buildpack will do the following:
 
-Absence of a shell precludes the use of catalina.sh for starting Tomcat.
-Tomcat startup commands are generated directly, with some functionality limitations compared to catalina.sh.
-Configuration options like bin/setenv.sh and CATALINA_* environment variables are unavailable.
-Tomcat runs with a umask set to 0022 instead of the default 0027 in catalina.sh.
-Configuration
-This buildpack offers several environment variables for fine-tuning:
+* Requests that a JRE be installed
+* Contribute a Tomcat instance to `$CATALINA_HOME`
+* Contribute a Tomcat instance to `$CATALINA_BASE`
+  * Contribute `context.xml`, `logging.properties`, `server.xml`, and `web.xml` to `conf/`
+  * Contribute [Access Logging Support][als], [Lifecycle Support][lcs], and [Logging Support][lgs]
+  * Contribute external configuration if available
+* Contributes `tomcat`, `task`, and `web` process types
 
-Environment Variable	Description
-$BP_JAVA_APP_SERVER	Specifies the application server to use. Defaults to `` (empty string), allowing the buildpack order to dictate the installed Java application server.
-$BP_TOMCAT_CONTEXT_PATH	Sets the context path for mounting the application. Defaults to empty (ROOT).
-$BP_TOMCAT_EXT_CONF_SHA256	SHA256 hash of the external configuration package.
-$BP_TOMCAT_ENV_PROPERTY_SOURCE_DISABLED	Disables configuration of org.apache.tomcat.util.digester.EnvironmentPropertySource when set to true. Useful for loading configuration from environment variables and referencing them in Tomcat configuration files.
-$BP_TOMCAT_EXT_CONF_STRIP	Specifies the number of directory levels to strip from the external configuration package. Defaults to 0.
-$BP_TOMCAT_EXT_CONF_URI	Sets the download URI for the external configuration package.
-$BP_TOMCAT_EXT_CONF_VERSION	Specifies the version of the external configuration package.
-$BP_TOMCAT_VERSION	Sets a specific Tomcat version. The value must exactly match an available version in the buildpack. Typically configured with a wildcard such as 9.*.
-BPL_TOMCAT_ACCESS_LOGGING_ENABLED	Enables access logging. Defaults to inactive.
-BPI_TOMCAT_ADDITIONAL_JARS	Allows inclusion of additional JARs to the Tomcat classpath. Multiple JARs should be separated by :.
-External Configuration Package
-When providing external configurations, ensure they adhere to the following TAR format:
+### Tiny Stack
 
-markdown
-Copy code
+When this buildpack runs on the [Tiny stack](https://paketo.io/docs/concepts/stacks/#tiny), which has no shell, the following notes apply:
+* As there is no shell, the `catalina.sh` script cannot be used to start Tomcat
+* The Tomcat Buildpack will generate a start command directly. It does not support all the functionality in `catalina.sh`.
+* Some configuration options such as `bin/setenv.sh` and setting `CATALINA_*` environment variables, will not be available.
+* Tomcat will be run with `umask` set to `0022` instead of the `catalina.sh`provided default of `0027`
+
+[als]: https://github.com/cloudfoundry/java-buildpack-support/tree/master/tomcat-access-logging-support
+[lcs]: https://github.com/cloudfoundry/java-buildpack-support/tree/master/tomcat-lifecycle-support
+[lgs]: https://github.com/cloudfoundry/java-buildpack-support/tree/master/tomcat-logging-support
+
+## Configuration
+| Environment Variable                      | Description                                                                                                                                                                                                                                                |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$BP_JAVA_APP_SERVER`                     | The application server to use. It defaults to `` (empty string) which means that order dictates which Java application server is installed. The first Java application server buildpack to run will be picked.                                             |
+| `$BP_TOMCAT_CONTEXT_PATH`                 | The context path to mount the application at.  Defaults to empty (`ROOT`).                                                                                                                                                                                 |
+| `$BP_TOMCAT_EXT_CONF_SHA256`              | The SHA256 hash of the external configuration package                                                                                                                                                                                                      |
+| `$BP_TOMCAT_ENV_PROPERTY_SOURCE_DISABLED` | When true the buildpack will not configure `org.apache.tomcat.util.digester.EnvironmentPropertySource`. This configuration option is added to support loading configuration from environment variables and referencing them in Tomcat configuration files. |
+| `$BP_TOMCAT_EXT_CONF_STRIP`               | The number of directory levels to strip from the external configuration package.  Defaults to `0`.                                                                                                                                                         |
+| `$BP_TOMCAT_EXT_CONF_URI`                 | The download URI of the external configuration package                                                                                                                                                                                                     |
+| `$BP_TOMCAT_EXT_CONF_VERSION`             | The version of the external configuration package                                                                                                                                                                                                          |
+| `$BP_TOMCAT_VERSION`                      | Configure a specific Tomcat version.  This value must _exactly_ match a version available in the buildpack so typically it would configured to a wildcard such as `9.*`.                                                                                   |
+| `BPL_TOMCAT_ACCESS_LOGGING_ENABLED`       | Whether access logging should be activated.  Defaults to inactive.                                                                                                                                                                                         |
+| `BPI_TOMCAT_ADDITIONAL_JARS`              | This should only be used in other buildpacks to include a `jar` to the tomcat classpath. Several `jars` must be separated by `:`. |
+
+### External Configuration Package
+The artifacts that the repository provides must be in TAR format and must follow the Tomcat archive structure:
+
+```
 <CATALINA_BASE>
 └── conf
     ├── context.xml
     ├── server.xml
     ├── web.xml
     ├── ...
-Environment Property Source
-Enabling the Environment Property Source allows loading Tomcat's configuration files from environment variables, enhancing flexibility and ease of management.
+```
 
-Bindings
-Optionally, the buildpack can accept the following bindings:
+### Environment Property Source
+When the Environment Property Source is configured, configuration for Tomcats [configuration files](https://tomcat.apache.org/tomcat-9.0-doc/config/systemprops.html) can be loaded
+from environment variables. To use this feature, the name of the environment variable must match the name of the property.
 
-Type: dependency-mapping
-Key	Value	Description
-<dependency-digest>	<uri>	Fetches the dependency with digest <dependency-digest> from <uri> if needed.
-Providing Additional JARs to Tomcat
-Buildpacks can contribute JARs to Tomcat's CLASSPATH by appending paths to BPI_TOMCAT_ADDITIONAL_JARS.
+## Bindings
+The buildpack optionally accepts the following bindings:
 
-go
-Copy code
-// Example function to contribute additional JARs
+### Type: `dependency-mapping`
+| Key                   | Value   | Description                                                                                       |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `<dependency-digest>` | `<uri>` | If needed, the buildpack will fetch the dependency with digest `<dependency-digest>` from `<uri>` |
+
+## Providing Additional JARs to Tomcat
+
+Buildpacks can contribute JARs to the `CLASSPATH` of Tomcat by appending a path to `BPI_TOMCAT_ADDITIONAL_JARS`.
+
+```go
 func (s) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	// Copy dependency into the layer
 	file := filepath.Join(layer.Path, filepath.Base(s.Dependency.URI))
@@ -84,5 +91,9 @@ func (s) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	layer.LaunchEnvironment.Append("BPI_TOMCAT_ADDITIONAL_JARS", ":", strings.Join(additionalJars, ":"))
 	return layer, nil
 }
-License
-This buildpack is released under version 2.0 of the Apache License.
+```
+
+## License
+This buildpack is released under version 2.0 of the [Apache License][a].
+
+[a]: http://www.apache.org/licenses/LICENSE-2.0

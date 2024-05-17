@@ -1,4 +1,4 @@
-# `docker.io/initializ-buildpacks/apache-tomcat`
+# `https://hub.docker.com/r/initializbuildpacks/apache-tomcat` 
 
 The Initializ Buildpack for Apache Tomcat is a Cloud Native Buildpack that contributes Apache Tomcat and Process Types for WARs.
 

@@ -81,64 +81,32 @@ api = "0.7"
     name = "BP_TOMCAT_VERSION"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:apache:tomcat:8.5.100:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:apache:tomcat:9.0.90:*:*:*:*:*:*:*"]
     id = "tomcat"
     name = "Apache Tomcat"
-    purl = "pkg:generic/apache-tomcat@8.5.100"
-    sha256 = "163abe51289dd09dc375791888d6f2d5508c06050548dc4fc7700251f4bebaca"
-    source = "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.100/src/apache-tomcat-8.5.100-src.tar.gz"
-    source-sha256 = "818815f612002b6b6a255b80e6b157096f352d9c5c4f73c77aefbbe305ce86cf"
+    purl = "pkg:generic/apache-tomcat@9.0.90"
+    sha256 = "318491c4be43494e6872b5277c40cac8506901d744ad09d37df62e88543f6223"
+    source = "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.90/src/apache-tomcat-9.0.90-src.tar.gz"
+    source-sha256 = "3a889001cff5ad8464ef100e1514dc1727d1586b003ba85b3855a98e1794ea22"
     stacks = ["*"]
-    uri = "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.100/bin/apache-tomcat-8.5.100.tar.gz"
-    version = "8.5.100"
+    uri = "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.90/bin/apache-tomcat-9.0.90.tar.gz"
+    version = "9.0.90"
 
     [[metadata.dependencies.licenses]]
       type = "Apache-2.0"
       uri = "https://www.apache.org/licenses/"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:apache:tomcat:9.0.87:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:apache:tomcat:10.1.25:*:*:*:*:*:*:*"]
     id = "tomcat"
     name = "Apache Tomcat"
-    purl = "pkg:generic/apache-tomcat@9.0.87"
-    sha256 = "da482fb9220086dbf371e180aa09c6402af8f048586734cdedd4a08c48d4ce02"
-    source = "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.87/src/apache-tomcat-9.0.87-src.tar.gz"
-    source-sha256 = "cf9248f068152518445f6e418b5a6a1251ea3b8c7a60f6d35c6d3a79d13d26b1"
+    purl = "pkg:generic/apache-tomcat@10.1.25"
+    sha256 = "f1240a32b879c445a4a4419c9b6dd87581bdb96f8a51f7b0ca1935164bb1e842"
+    source = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.25/src/apache-tomcat-10.1.25-src.tar.gz"
+    source-sha256 = "bb82636e5d2a489b2b197dbcacf2578964b17e26cbd2f7ecb2aa30c006a730f3"
     stacks = ["*"]
-    uri = "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.87/bin/apache-tomcat-9.0.87.tar.gz"
-    version = "9.0.87"
-
-    [[metadata.dependencies.licenses]]
-      type = "Apache-2.0"
-      uri = "https://www.apache.org/licenses/"
-
-  [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:apache:tomcat:10.0.27:*:*:*:*:*:*:*"]
-    id = "tomcat"
-    name = "Apache Tomcat"
-    purl = "pkg:generic/apache-tomcat@10.0.27"
-    sha256 = "3766ad98e76156b1b1f3c79739cf56ce2abc927ec85b34de1721698abff91cb7"
-    source = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.27/src/apache-tomcat-10.0.27-src.tar.gz"
-    source-sha256 = "bff23db976c652391e92a046caeac8e834d0c829fb88f6ba80dfd504e33a8f62"
-    stacks = ["*"]
-    uri = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.27/bin/apache-tomcat-10.0.27.tar.gz"
-    version = "10.0.27"
-
-    [[metadata.dependencies.licenses]]
-      type = "Apache-2.0"
-      uri = "https://www.apache.org/licenses/"
-
-  [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:apache:tomcat:10.1.20:*:*:*:*:*:*:*"]
-    id = "tomcat"
-    name = "Apache Tomcat"
-    purl = "pkg:generic/apache-tomcat@10.1.20"
-    sha256 = "8427c5509f14e482940a015f3f60de20342d3d72c8dea9982a4d7112cb71a6ee"
-    source = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.20/src/apache-tomcat-10.1.20-src.tar.gz"
-    source-sha256 = "d5f020e5761f75654c071a94188c30bc69c053984c8829f15963aa86c9225026"
-    stacks = ["*"]
-    uri = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.20/bin/apache-tomcat-10.1.20.tar.gz"
-    version = "10.1.20"
+    uri = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.25/bin/apache-tomcat-10.1.25.tar.gz"
+    version = "10.1.25"
 
     [[metadata.dependencies.licenses]]
       type = "Apache-2.0"

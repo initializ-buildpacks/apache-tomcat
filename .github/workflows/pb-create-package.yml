@@ -184,7 +184,7 @@ jobs:
                     --format "${FORMAT}" $([ -n "$TTL_SH_PUBLISH" ] && [ "$TTL_SH_PUBLISH" = "true" ] && echo "--publish")
                 fi
               env:
-                PACKAGES: docker.io/initializbuildpacks/apache-tomcat gcr.io/initializ-buildpacks/apache-tomcat
+                PACKAGES: docker.io/initializbuildpacks/apache-tomcat
                 PUBLISH: "true"
                 VERSION: ${{ steps.version.outputs.version }}
                 VERSION_MAJOR: ${{ steps.version.outputs.version-major }}

@@ -9,23 +9,16 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
-            - name: Docker login gcr.io
-              if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
-              uses: docker/login-action@v3
-              with:
-                password: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
-                registry: gcr.io
-                username: _json_key
             - name: Docker login docker.io
               if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
               uses: docker/login-action@v3
               with:
-                password: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
+                password: ${{ secrets.INITIALIZ_BUILDPACKS_DOCKERHUB_PASSWORD }}
                 registry: docker.io
-                username: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
+                username: ${{ secrets.INITIALIZ_BUILDPACKS_DOCKERHUB_USERNAME }}
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.22"
+                go-version: "1.22.5"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -33,13 +26,24 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package@latest
-            - uses: buildpacks/github-actions/setup-tools@v5.5.3
+            - uses: buildpacks/github-actions/setup-tools@v5.6.0
               with:
-                crane-version: 0.19.0
+                crane-version: 0.19.1
                 yj-version: 5.1.0
-            - uses: buildpacks/github-actions/setup-pack@v5.5.3
-              with:
-                pack-version: 0.33.2
+            - name: Install pack
+              run: |
+                #!/usr/bin/env bash
+                # this is coming from a copy of https://github.com/buildpacks/pack/actions/runs/8118576298 stored on box
+                # TODO to revisit when the official one is out
+                set -euo pipefail
+
+                echo "Installing pack experimental"
+
+                mkdir -p "${HOME}"/bin
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
+
+                curl -L "https://github.com/buildpacks/pack/releases/download/v0.34.2/pack-v0.34.2-linux.tgz" | tar xvz -C "${HOME}/bin"
+                chmod +x "${HOME}"/bin/pack
             - name: Enable pack Experimental
               if: ${{ false }}
               run: |
@@ -106,21 +110,23 @@ jobs:
 
                 if [[ "${INCLUDE_DEPENDENCIES}" == "true" ]]; then
                   create-package \
-                    --source ${SOURCE_PATH:-.} \
+                    --source "${SOURCE_PATH:-.}" \
                     --cache-location "${HOME}"/carton-cache \
                     --destination "${HOME}"/buildpack \
                     --include-dependencies \
                     --version "${VERSION}"
                 else
                   create-package \
-                    --source ${SOURCE_PATH:-.} \
+                    --source "${SOURCE_PATH:-.}" \
                     --destination "${HOME}"/buildpack \
                     --version "${VERSION}"
                 fi
 
-                PACKAGE_FILE=${SOURCE_PATH:-.}/package.toml
-                [[ -e ${PACKAGE_FILE} ]] && cp ${PACKAGE_FILE} "${HOME}"/package.toml
-                printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}"/buildpack "${OS}" >> "${HOME}"/package.toml
+                PACKAGE_FILE="${SOURCE_PATH:-.}/package.toml"
+                if [ -f "${PACKAGE_FILE}" ]; then
+                  cp "${PACKAGE_FILE}" "${HOME}/buildpack/package.toml"
+                  printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}/buildpack" "${OS}" >> "${HOME}/buildpack/package.toml"
+                fi
               env:
                 INCLUDE_DEPENDENCIES: "false"
                 OS: linux
@@ -133,15 +139,23 @@ jobs:
 
                 set -euo pipefail
 
+                COMPILED_BUILDPACK="${HOME}/buildpack"
+
+                # create-package puts the buildpack here, we need to run from that directory
+                #   for component buildpacks so that pack doesn't need a package.toml
+                cd "${COMPILED_BUILDPACK}"
+                CONFIG=""
+                if [ -f "${COMPILED_BUILDPACK}/package.toml" ]; then
+                  CONFIG="--config ${COMPILED_BUILDPACK}/package.toml"
+                fi
 
                 PACKAGE_LIST=($PACKAGES)
                 # Extract first repo (Docker Hub) as the main to package & register
                 PACKAGE=${PACKAGE_LIST[0]}
 
                 if [[ "${PUBLISH:-x}" == "true" ]]; then
-                  pack buildpack package \
-                    "${PACKAGE}:${VERSION}" \
-                    --config "${HOME}"/package.toml \
+                  pack -v buildpack package \
+                    "${PACKAGE}:${VERSION}" ${CONFIG} \
                     --publish
 
                   if [[ -n ${VERSION_MINOR:-} && -n ${VERSION_MAJOR:-} ]]; then
@@ -165,13 +179,12 @@ jobs:
                     done
 
                 else
-                  pack buildpack package \
-                    "${PACKAGE}:${VERSION}" \
-                    --config "${HOME}"/package.toml \
-                    --format "${FORMAT}"
+                  pack -v buildpack package \
+                    "${PACKAGE}:${VERSION}" ${CONFIG} \
+                    --format "${FORMAT}" $([ -n "$TTL_SH_PUBLISH" ] && [ "$TTL_SH_PUBLISH" = "true" ] && echo "--publish")
                 fi
               env:
-                PACKAGES: docker.io/paketobuildpacks/apache-tomcat gcr.io/initializ-buildpacks/apache-tomcat
+                PACKAGES: docker.io/initializbuildpacks/apache-tomcat gcr.io/initializ-buildpacks/apache-tomcat
                 PUBLISH: "true"
                 VERSION: ${{ steps.version.outputs.version }}
                 VERSION_MAJOR: ${{ steps.version.outputs.version-major }}
@@ -197,11 +210,11 @@ jobs:
                   --field "body=${RELEASE_BODY//<!-- DIGEST PLACEHOLDER -->/\`${DIGEST}\`}"
               env:
                 DIGEST: ${{ steps.package.outputs.digest }}
-                GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.PAT }}
             - if: ${{ true }}
-              uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:4.0.1
+              uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:5.6.0
               with:
-                address: docker.io/paketobuildpacks/apache-tomcat@${{ steps.package.outputs.digest }}
+                address: docker.io/initializbuildpacks/apache-tomcat@${{ steps.package.outputs.digest }}
                 id: initializ-buildpacks/apache-tomcat
-                token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+                token: ${{ secrets.PAT }}
                 version: ${{ steps.version.outputs.version }}

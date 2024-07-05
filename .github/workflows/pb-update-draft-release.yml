@@ -15,7 +15,7 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.PAT }}
             - uses: actions/checkout@v4
             - name: Update draft release with buildpack information
-              uses: docker://ghcr.io/initializ-buildpacks/actions/draft-release:main
+              uses: docker://ghcr.io/paketo-buildpacks/actions/draft-release:main
               with:
                 github_token: ${{ secrets.PAT }}
                 release_body: ${{ steps.release-drafter.outputs.body }}

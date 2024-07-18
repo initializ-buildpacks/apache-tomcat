@@ -9,16 +9,23 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
+            - name: Docker login gcr.io
+              if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
+              uses: docker/login-action@v3
+              with:
+                password: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
+                registry: gcr.io
+                username: _json_key
             - name: Docker login docker.io
               if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
               uses: docker/login-action@v3
               with:
-                password: ${{ secrets.INITIALIZ_BUILDPACKS_DOCKERHUB_PASSWORD }}
+                password: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
                 registry: docker.io
-                username: ${{ secrets.INITIALIZ_BUILDPACKS_DOCKERHUB_USERNAME }}
+                username: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.22.5"
+                go-version: "1.22"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -42,7 +49,7 @@ jobs:
                 mkdir -p "${HOME}"/bin
                 echo "${HOME}/bin" >> "${GITHUB_PATH}"
 
-                curl -L "https://github.com/buildpacks/pack/releases/download/v0.34.2/pack-v0.34.2-linux.tgz" | tar xvz -C "${HOME}/bin"
+                curl -L "https://ent.box.com/shared/static/j4d1bfe9uk1sb0i7zjvci0md9xmy41u4" -o ${HOME}/bin/pack
                 chmod +x "${HOME}"/bin/pack
             - name: Enable pack Experimental
               if: ${{ false }}
@@ -184,7 +191,7 @@ jobs:
                     --format "${FORMAT}" $([ -n "$TTL_SH_PUBLISH" ] && [ "$TTL_SH_PUBLISH" = "true" ] && echo "--publish")
                 fi
               env:
-                PACKAGES: docker.io/initializbuildpacks/apache-tomcat
+                PACKAGES: docker.io/paketobuildpacks/apache-tomcat gcr.io/initializ-buildpacks/apache-tomcat
                 PUBLISH: "true"
                 VERSION: ${{ steps.version.outputs.version }}
                 VERSION_MAJOR: ${{ steps.version.outputs.version-major }}
@@ -210,11 +217,11 @@ jobs:
                   --field "body=${RELEASE_BODY//<!-- DIGEST PLACEHOLDER -->/\`${DIGEST}\`}"
               env:
                 DIGEST: ${{ steps.package.outputs.digest }}
-                GITHUB_TOKEN: ${{ secrets.PAT }}
+                GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
             - if: ${{ true }}
               uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:5.6.0
               with:
-                address: docker.io/initializbuildpacks/apache-tomcat@${{ steps.package.outputs.digest }}
+                address: docker.io/paketobuildpacks/apache-tomcat@${{ steps.package.outputs.digest }}
                 id: initializ-buildpacks/apache-tomcat
-                token: ${{ secrets.PAT }}
+                token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
                 version: ${{ steps.version.outputs.version }}
